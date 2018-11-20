@@ -33,6 +33,9 @@ import (
 	"k8s.io/cloud-provider-baiducloud/pkg/sdk/vpc"
 )
 
+// 简陋的开关，用于CCM的私有化 -_-
+const privateCCM = true
+
 const ServiceAnnotationLoadBalancerInternalVPC = "service.beta.kubernetes.io/cce-load-balancer-internal-vpc"
 
 func (bc *BCECloud) GetLoadBalancer(ctx context.Context, clusterName string, service *v1.Service) (status *v1.LoadBalancerStatus, exists bool, err error) {
@@ -93,6 +96,9 @@ func (bc *BCECloud) EnsureLoadBalancer(ctx context.Context, clusterName string, 
 	internalVPCBLB := false
 	internalVPCBLBAnnotation := service.Annotations[ServiceAnnotationLoadBalancerInternalVPC]
 	if internalVPCBLBAnnotation == "true" {
+		internalVPCBLB = true
+	}
+	if privateCCM {
 		internalVPCBLB = true
 	}
 	lb, exists, err := bc.getBCELoadBalancer(cloudprovider.GetLoadBalancerName(service))
@@ -323,6 +329,9 @@ func (bc *BCECloud) EnsureLoadBalancerDeleted(ctx context.Context, clusterName s
 	internalVPCBLB := false
 	internalVPCBLBAnnotation := service.Annotations[ServiceAnnotationLoadBalancerInternalVPC]
 	if internalVPCBLBAnnotation == "true" {
+		internalVPCBLB = true
+	}
+	if privateCCM {
 		internalVPCBLB = true
 	}
 	lbName := cloudprovider.GetLoadBalancerName(service)
